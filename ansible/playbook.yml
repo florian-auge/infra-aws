@@ -1,0 +1,40 @@
+---
+- name: Configurer mon EC2
+  hosts: ec2
+  remote_user: ubuntu
+  vars:
+    docker_image: "florianauge/devops-trainer"
+    app_port: "5000"
+    rds_user: "admin"
+    rds_database: "devops_trainer"
+    rds_endpoint: "{{ lookup('env', 'RDS_ENDPOINT') }}"
+    rds_password: "{{ lookup('env', 'RDS_PASSWORD') }}"
+  tasks:
+    - name: Mettre à jour les packages
+      apt:
+        update_cache: yes
+      become: yes
+    - name: Installer Docker
+      apt:
+        name: docker.io
+        state: present
+      become: yes
+    - name: Supprimer l'ancien conteneur si existant
+      shell: docker rm -f devops-trainer
+      become: yes
+      ignore_errors: yes
+    - name: Lancer le conteneur Flask
+      shell: docker run -d \
+        -e RDS_ENDPOINT={{ rds_endpoint }} \
+        -e RDS_USER={{ rds_user }} \
+        -e RDS_PASSWORD={{ rds_password }} \
+        -e RDS_DATABASE={{ rds_database }} \
+        -p {{ app_port }}:{{ app_port }} \
+        --name devops-trainer {{ docker_image }}
+      become: yes
+      ignore_errors: yes
+    - name: Activer Docker au démarrage
+      systemd:
+        name: docker
+        enabled: yes
+      become: yes
