@@ -1,3 +1,6 @@
+# Variables d'environnement à exclure
+.env
+
 # Local .terraform directories
 .terraform/
 
