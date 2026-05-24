@@ -12,6 +12,9 @@ jobs:
     steps:
       - name: Se connecter à EC2 et déployer
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          RDS_ENDPOINT: ${{ secrets.RDS_ENDPOINT }}
+          RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
