@@ -20,8 +20,8 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           envs: RDS_ENDPOINT,RDS_PASSWORD
+          request_pty: true
           script: |
             cd infra-aws
             git pull
-            echo "RDS_ENDPOINT=$RDS_ENDPOINT"
-            mysql -h $RDS_ENDPOINT -u admin -p$RDS_PASSWORD devops_trainer < database/devops_trainer_data.sql
+            mysql --protocol=TCP -h $RDS_ENDPOINT -u admin -p$RDS_PASSWORD devops_trainer < database/devops_trainer_data.sql
