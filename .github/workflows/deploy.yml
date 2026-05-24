@@ -23,4 +23,5 @@ jobs:
           script: |
             cd infra-aws
             git pull
+            echo "RDS_ENDPOINT=$RDS_ENDPOINT"
             mysql -h $RDS_ENDPOINT -u admin -p$RDS_PASSWORD devops_trainer < database/devops_trainer_data.sql
