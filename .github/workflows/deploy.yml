@@ -22,5 +22,6 @@ jobs:
           envs: RDS_ENDPOINT,RDS_PASSWORD
           request_pty: true
           script: |
-            echo "RDS_ENDPOINT=$RDS_ENDPOINT"
-            echo "RDS_PASSWORD=$RDS_PASSWORD"
+            cd infra-aws
+            git pull
+            mysql --protocol=TCP -h $RDS_ENDPOINT -u admin -p$RDS_PASSWORD devops_trainer < database/devops_trainer_data.sql
