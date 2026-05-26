@@ -29,7 +29,8 @@ jobs:
             mysql --protocol=TCP -h $RDS_ENDPOINT -u admin -p$RDS_PASSWORD devops_trainer < database/devops_trainer_data.sql
             cd docker
             sudo docker build -t flask-app .
-            sudo docker stop $(sudo docker ps -q) || true
+            sudo docker stop $(sudo docker ps -aq) || true
+            sudo docker rm $(sudo docker ps -aq) || true
             sudo docker run -d -p 5000:5000 \
               -e RDS_ENDPOINT=$RDS_ENDPOINT \
               -e RDS_USER=$RDS_USER \
