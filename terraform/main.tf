@@ -7,6 +7,11 @@ variable "db_password" {
   sensitive   = true
 }
 
+variable "my_ip" {
+  description = "Adresse IP autorisée en SSH (format CIDR, ex: 1.2.3.4/32)"
+  type        = string
+}
+
 resource "aws_instance" "devops_trainer_ec2" {
   ami                    = "ami-0be40a46b4111e7f5"
   instance_type          = "t3.micro"
@@ -40,7 +45,7 @@ resource "aws_security_group" "devops_trainer_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["82.65.16.6/32"]
+    cidr_blocks = [var.my_ip]
   }
 
   ingress {
