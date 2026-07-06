@@ -1,0 +1,5 @@
+# Copier ce fichier en "terraform.tfvars" (déjà exclu par .gitignore) et remplir mes propres valeurs.
+# Ne jamais commiter terraform.tfvars.
+
+db_password = "ton-mot-de-passe-rds"
+my_ip       = "1.2.3.4/32"  # ton IP publique actuelle, au format CIDR
