@@ -21,3 +21,27 @@ sur l'instance, provoquant l'incident suivant (permission denied + port already 
 **Cause** : daemon Docker qui ne répond plus correctement (probablement lié à l'incident réseau SG/port 22)
 **Fix** : sudo systemctl restart docker && sudo docker rm -f $(sudo docker ps -aq)
 **Vu le** : 5 juillet 2026 (EC2 prod, via pipeline)
+
+## BucketAlreadyExists lors de la création S3
+**Symptôme** : "BucketAlreadyExists: The requested bucket name is not available"
+**Cause** : les noms de bucket S3 sont uniques à l'échelle mondiale, pas seulement au sein de mon compte AWS
+**Fix** : renommage du bucket avec un préfixe personnel (`flo-tf-boot-bucket`) pour garantir l'unicité
+**Vu le** : 14 juillet 2026 (bootstrap Terraform backend)
+
+## AccessDeniedException dynamodb:CreateTable
+**Symptôme** : "User: florian-dev is not authorized to perform: dynamodb:CreateTable"
+**Cause** : policy IAM de `florian-dev` volontairement restreinte, n'incluait aucune permission DynamoDB (jamais utilisé ce service avant)
+**Fix** : création d'une policy IAM custom, scopée à l'ARN exact de la table (pas de policy managée type `AmazonDynamoDBFullAccess`, trop permissive)
+**Vu le** : 14 juillet 2026 (bootstrap Terraform backend)
+
+## AccessDeniedException en cascade sur attributs computed DynamoDB
+**Symptôme** : après un `CreateTable` réussi, erreurs successives sur `dynamodb:DescribeContinuousBackups`, puis `dynamodb:DescribeTimeToLive`, puis `dynamodb:ListTagsOfResource`
+**Cause** : le provider Terraform AWS effectue plusieurs appels de lecture après création pour peupler les attributs "computed" de la resource (PITR, TTL, tags) : chaque appel nécessite sa propre permission IAM, non listée de façon exhaustive dans la doc officielle
+**Fix** : ajout progressif de chaque action manquante à la policy IAM custom, jusqu'à couverture complète
+**Vu le** : 14 juillet 2026 (bootstrap Terraform backend)
+
+## Resource DynamoDB "tainted" après apply échoué
+**Symptôme** : `terraform plan` suivant affiche "is tainted, so must be replaced" (`destroy` puis `create` au lieu d'un simple state OK)
+**Cause** : le premier `apply` avait échoué en cours de création (erreurs IAM ci-dessus) ; Terraform ne pouvait plus faire confiance à l'état partiel de la ressource
+**Fix** : aucune action corrective nécessaire - comportement normal et sûr de Terraform (destroy + recreate propre au prochain apply)
+**Vu le** : 14 juillet 2026 (bootstrap Terraform backend)
